@@ -31,6 +31,7 @@
 #include <sys/ioctl.h>
 #include <sys/wait.h>
 #include "shell.h"
+#include "../fbconfig.h"
 
 void waitChildProcessExit(s32 pid)
 {
@@ -71,6 +72,7 @@ Shell::~Shell()
 void Shell::createShellProcess(s8 **command)
 {
 	s32 fd;
+	s8 term[32] = "linux";
 	mPid = forkpty(&fd, NULL, NULL, NULL);
 
 	switch (mPid) {
@@ -79,7 +81,8 @@ void Shell::createShellProcess(s8 **command)
 
 	case 0:  // child process
 		initShellProcess();
-		setenv("TERM", "linux", 1);
+		Config::instance()->getOption("term", term, sizeof(term));
+		setenv("TERM", term, 1);
 
 		if (command) {
 			execvp(command[0], command);
